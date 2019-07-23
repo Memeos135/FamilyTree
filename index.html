@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<style>
+circle{
+  fill:white;
+  stroke:steelblue;  
+  stroke-width:2px;
+}
+line{
+  stroke:grey;
+  stroke-width:3px;
+}
+.wife_info_container{
+	margin-left: 5%;
+}
+.husband_info_container{
+	margin-left: 5%;
+}
+.incRect{
+	stroke:grey;
+	shape-rendering:crispEdges;
+}
+#incMatx text{
+	text-anchor:middle;
+	cursor:default;
+}
+#treesvg g text:hover, #treesvg g circle:hover{
+	cursor:pointer;
+}
+#navdiv{
+	background:#555;
+}
+#labelpos{
+	color:white;
+}
+#navdiv button, #navdiv textarea{
+	vertical-align:middle;
+}
+#g_labels text{
+	text-anchor:middle;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 20%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.root_container{
+	display: inline-block;
+	position: absolute;
+	left: 50%;
+	margin-left: -125px;
+	top: 50%;
+	margin-top: -125px;
+}
+
+/* Style inputs */
+  input[type=text], select {
+  padding: 12px 20px;
+  margin: 8px 0;
+}
+/* Style inputs */
+  input[type=checkbox], select {
+  padding: 12px 20px;
+  margin: 16px 16px;
+}
+/* Style the submit button */
+input[type=submit] {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+}
+
+/* Add a background color to the submit button on mouse-over */
+input[type=submit]:hover {
+  background-color: #45a049;
+}
+
+</style>
+<body>
+	<svg class="svg" id="treesvg"></svg>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+
+	<div class="root_container" id="root_container">
+		<div class="root_info_container">
+		<div>
+			<label for="name">Root Name</label>
+	    	<input type="text" id="name" name="name" placeholder="Your name..">
+		</div>
+		<div>
+		    <label for="gender">Root Gender</label>
+		    <select class="gender" name="gender">
+				  <option value="male">Male</option>
+				  <option value="female">Female</option>
+			</select>
+		</div>
+		<div>
+			Add Wife/Husband? <input type="checkbox" class="checkbox" onchange="handleRootCheckBox(this)">
+		</div>
+	</div>
+	<div>
+	    	<input type="submit" name="submit" value="Submit">
+		</div>
+	</div>
+	<!-- The Modal -->
+	<div id="myModal" class="modal">
+	  <!-- Modal content -->
+	  <div class="modal-content">
+	    <span class="close">&times;</span>
+	    <!-- Modal Input Fields -->
+	    <div class="input_container">
+	    	Name:<br><input name="name" type="text"><br><br>
+	    	Relationship:<br><input name="relationship" type="text"><br><br>
+	    	Gender:<br><select class="genders" name="genders" onchange="resetData()">
+				  <option value="male">Male</option>
+				  <option value="female">Female</option>
+			</select><br><br>
+			Add Wife/Husband? <input type="checkbox" class="checkbox" onchange="handleCheckBox(this)"><br><br>
+		</div>
+		<button class="button" type="button">SUBMIT</button>
+	  </div>
+
+	</div>
+
+<script>
+
+	// dynamic wife/husband container add
+	var status = "wife";
+	var depth;
+
+	// get input and add it to the tree
+	var modal = document.getElementById("myModal");
+	var span = document.getElementsByClassName("close")[0];
+	var checkbox = document.getElementById("checkbox");
+
+	var height = 300;
+	var width = screen.width;
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function handleRootCheckBox(checkbox) {
+		if($(".gender").find(":selected").text() == "Male"){
+			status = "husband";
+		}
+	    if(checkbox.checked == true){
+	        // add wife section
+	        $(".root_info_container").append("<div class=\""+ status +"_info_container\"> Name:<br><input type=\"text\" name=\"second_name\"><br><br>Parent:<br><input name=\"parent\" type=\"text\"><br><br></div>");
+	    }else{
+	        // remove wife section
+	        $("." + status + "_info_container").remove();
+	   }
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	// reset wife/husband container when gender is changed
+	function resetData() {
+		$("." + status + "_info_container").remove();
+		$(".checkbox").prop("checked", false);
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function handleCheckBox(checkbox) {
+		if($(".genders").find(":selected").text() == "Male"){
+			status = "husband";
+		}
+	    if(checkbox.checked == true){
+	        // add wife section
+	        $(".input_container").append("<div class=\""+ status +"_info_container\"> Name:<br><input type=\"text\" name=\"second_name\"><br><br>Parent:<br><input name=\"parent\" type=\"text\"><br><br></div>");
+	    }else{
+	        // remove wife section
+	        $("." + status + "_info_container").remove();
+	   }
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function tree(){
+		var vRad=12, tree={cx:width/2, cy:30, w:40, h:70};
+		tree.vis={v:0, l:'', p:{x:tree.cx, y:tree.cy},c:[], data:{name:'', relationship:'', gender:'', wife:'', husband:'', wife_parent:'', husband_parent:''}};	
+		tree.size=1;
+		tree.incMatx =[];
+		tree.incX=500, tree.incY=30, tree.incS=20;
+	
+	tree.getVertices =  function(){
+		var v =[];
+		function getVertices(t,f){	
+			v.push({v:t.v, l:t.l, p:t.p, f:f});	
+			t.c.forEach(function(d){ return getVertices(d,{v:t.v, p:t.p}); });
+		}
+		getVertices(tree.vis,{});
+		return v.sort(function(a,b){ return a.v - b.v;});
+	}
+	
+	tree.getEdges =  function(){
+		var e =[];
+		function getEdges(_){
+			_.c.forEach(function(d){ e.push({v1:_.v, l1:_.l, p1:_.p, v2:d.v, l2:d.l, p2:d.p});});
+			_.c.forEach(getEdges);
+		}
+		getEdges(tree.vis);
+		return e.sort(function(a,b){ return a.v2 - b.v2;});	
+	}
+	
+	tree.addLeaf = function(extra, _, data){
+		function addLeaf(t){
+			if(t.v==_){ t.c.push({v:tree.size++, l: data, p:{},c:[], data:{name:$("input[name=name]").val(), relationship:$("input[name=relationship]").val(), gender:$(".genders").find(":selected").text(), wife:checkWife(0), husband:checkHusband(0), wife_parent:checkWifeParent(0), husband_parent:checkHusbandParent(0)}}); return; }
+				t.c.forEach(addLeaf);
+		}
+
+		addLeaf(extra);
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function checkWife(_){
+
+		var val = '';
+		if(_ == 0){
+			val = "genders";
+		}else{
+			val = "gender";
+		}
+
+		if($(".checkbox").prop("checked")==true){
+				if($("." + val).find(":selected").text() == 'Male'){
+					return $("input[name=second_name]").val();
+				}else{
+					return '';
+				}
+		}else{
+			return '';
+		}
+	}
+
+	function checkHusband(_){
+		var val = '';
+		if(_ == 0){
+			val = "genders";
+		}else{
+			val = "gender";
+		}
+
+		if($(".checkbox").prop("checked")==true){
+				if($("."+ val).find(":selected").text() == 'Female'){
+					return $("input[name=second_name]").val();
+				}else{
+					return '';
+				}
+		}else{
+			return '';
+		}
+	}
+
+	function checkWifeParent(_){
+		var val = '';
+		if(_ == 0){
+			val = "genders";
+		}else{
+			val = "gender";
+		}
+
+		if($(".checkbox").prop("checked")==true){
+				if($("." + val).find(":selected").text() == 'Male'){
+					return $("input[name=parent]").val();
+				}else{
+					return '';
+				}
+			}else{
+				return '';
+			}
+	}
+
+	function checkHusbandParent(_){
+		var val = '';
+		if(_ == 0){
+			val = "genders";
+		}else{
+			val = "gender";
+		}
+		if($(".checkbox").prop("checked")==true){
+				if($("." + val).find(":selected").text() == 'Female'){
+					return $("input[name=second_name]").val();
+				}else{
+					return '';
+				}
+		}else{
+			return '';
+		}
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function openDialog(_){
+		temp = _;
+		modal.style.display = "inline-block";
+
+		// click close in modal
+		span.onclick = function() {
+				modal.style.display = "none";
+				// if fields are empty, remove the last added item - because of the logic of implementation, it will always add a node and then we're manually editing it
+				// example: if a user clicks on a node, it will add one, then if he closes the window, the node is still there. WE DELETE IT
+				tree.vis.c.pop();
+				$("input[name=name]").val('');
+				$("input[name=relationship]").val('');
+				$("input[name=second_name]").val('');
+				$("input[name=parent]").val('');
+				$(".checkbox").prop("checked", false);
+				$("." + status + "_info_container").remove();
+		}
+
+
+		$(".button").on('click', function(){
+			// input validation first
+			if($("input[name=name]").val() == "" || $("input[name=relationship]").val() == ""){
+				alert("Please fill out empty fields");
+
+			}else{
+
+				if($(".checkbox").prop("checked")==true && ($("input[name=second_name]").val() == "" || $("input[name=parent]").val() == "")){
+					alert("Please fill out all empty fields");
+
+				}else{
+
+					// add the node through addLeaf function
+					tree.addLeaf(tree.vis, temp, $("input[name=name]").val().charAt(0));
+					reposition(tree.vis);
+
+					// read directly from g_circles children - last element (is the newly added one) and compare to all previous
+					var x = document.getElementById("g_circles").lastChild;
+					var newCY = x.getAttribute("cy");
+
+					// flag to check if I am going horizontally or vertically
+					var flag = false;
+
+					for(var i = 0; i < $("#g_circles circle").length-1; i++){
+						// if it is a horizontal addition, add horizontal height
+						if($("#g_circles circle").eq(i).attr('cy') == newCY){
+
+							var svg = document.getElementById("treesvg");
+							width = width + 30;
+							svg.setAttribute("width", width);
+
+							// reposition root to center
+							repositionRoot(tree.vis);
+
+							flag = true;
+							break;
+						}
+					}
+
+					// if it is not a horizontal addition, add vertical height
+					if(!flag){
+						var svg = document.getElementById("treesvg");
+						height = height + 75;
+						svg.setAttribute("height", height);
+					}
+					redraw();
+
+					// empty fields and remove modal
+					$("input[name=name]").val('');
+					$("input[name=relationship]").val('');
+					$("input[name=second_name]").val('');
+					$("input[name=parent]").val('');
+					$(".checkbox").prop("checked", false);
+					$("." + status + "_info_container").remove();
+					modal.style.display = "none";
+				}
+			}
+		});
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	updateIncMatx = function(){
+		var n = tree.size-1;
+		tree.incMatx = d3.range(0,tree.size-1).map(function(){return 0;});
+		updateIncMatxl = function(t){
+			t.c.forEach(function(c){
+				t.l < c.l ? tree.incMatx[t.l]= tree.incMatx[t.l] | (1<<(n-c.l)) : tree.incMatx[c.l]= tree.incMatx[c.l] | (1<<(n-t.l));
+				updateIncMatxl(c);
+			});
+		}
+		updateIncMatxl(tree.vis);		
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	getIncMatxRow = function(i){
+		return d3.range(0,tree.size-1-i).map(function(d,j){ var n=tree.size-2-i-j; return (tree.incMatx[i] & 1<<n)>>n; });
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	redraw = function(){
+		var edges = d3.select("#g_lines").selectAll('line').data(tree.getEdges());
+		
+		edges.transition().duration(500)
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;})
+	
+		edges.enter().append('line')
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
+			.attr('x2',function(d){ return d.p1.x;}).attr('y2',function(d){ return d.p1.y;})
+			.transition().duration(500)
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;});
+			
+		var circles = d3.select("#g_circles").selectAll('circle').data(tree.getVertices());
+
+		circles.transition().duration(500).attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;});
+		
+		circles.enter().append('circle').attr('cx',function(d){ return d.f.p.x;}).attr('cy',function(d){ return d.f.p.y;}).attr('r',vRad)
+			.on('click',function(d){return openDialog(d.v);}).attr("id", "circle")
+			.transition().duration(500).attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;});
+			
+		var labels = d3.select("#g_labels").selectAll('text').data(tree.getVertices());
+		
+		labels.text(function(d){return d.l;}).transition().duration(500)
+			.attr('x',function(d){ return d.p.x;}).attr('y',function(d){ return d.p.y+5;});
+			
+		labels.enter().append('text').attr('x',function(d){ return d.f.p.x;}).attr('y',function(d){ return d.f.p.y+5;})
+			.text(function(d){return d.l;}).on('click',function(d){return openDialog(d.v);})
+			.transition().duration(500)
+			.attr('x',function(d){ return d.p.x;}).attr('y',function(d){ return d.p.y+5;});		
+
+		d3.select('#incMatx').selectAll(".incrow").data(tree.incMatx)
+			.enter().append('g').attr('class','incrow');
+			
+		d3.select('#incMatx').selectAll(".incrow").selectAll('.incRect')
+			.data(function(d,i){ return getIncMatxRow(i).map(function(v,j){return {y:i, x:j, f:v};})})
+			.enter().append('rect').attr('class','incRect');
+			
+		d3.select('#incMatx').selectAll('.incRect')
+			.attr('x',function(d,i){ return (d.x+d.y)*tree.incS;}).attr('y',function(d,i){ return d.y*tree.incS;})
+			.attr('width',function(){ return tree.incS;}).attr('height',function(){ return tree.incS;})
+			.attr('fill',function(d){ return d.f == 1? 'black':'white'});
+			
+		d3.select("#incMatx").selectAll('.incrowlabel').data(d3.range(0,tree.size)).enter()
+			.append('text').attr('class','incrowlabel');
+			
+		d3.select("#incMatx").selectAll('.incrowlabel').text(function(d){ return d;})
+			.attr('x',function(d,i){ return (i-0.5)*tree.incS}).attr('y',function(d,i){ return (i+0.8)*tree.incS});
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	getLeafCount = function(_){
+		if(_.c.length ==0) return 1;
+		else return _.c.map(getLeafCount).reduce(function(a,b){ return a+b;});
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	reposition = function(v){
+		var lC = getLeafCount(v), left=v.p.x - tree.w*(lC-1)/2;
+		v.c.forEach(function(d){
+			var w =tree.w*getLeafCount(d); 
+			left+=w; 
+			d.p = {x:left-(w+tree.w)/2, y:v.p.y+tree.h};
+			reposition(d);
+		});		
+	}	
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	repositionRoot = function(v){
+		var lC = getLeafCount(v), left=v.p.x - tree.w*(lC-1)/2;
+		v.p.x = width/2;
+		reposition(v);
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	initialize = function(_, _1, _2, _3){		
+
+		d3.select("#treesvg").append('g').attr('id','g_lines').selectAll('line').data(tree.getEdges()).enter().append('line')
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;});
+
+		d3.select("#treesvg").append('g').attr('id','g_circles').selectAll('circle').data(tree.getVertices()).enter()
+			.append('circle').attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;}).attr('r',vRad).attr("id", "circle_1")
+			.on('click',function(d){return openDialog(d.v);});
+			
+		d3.select("#treesvg").append('g').attr('id','g_labels').selectAll('text').data(tree.getVertices()).enter().append('text')
+			.attr('x',function(d){ return d.p.x;}).attr('y',function(d){ return d.p.y+5;}).text(function(d){return _.charAt(0);})
+			.on('click',function(d){return openDialog(d.v);});	
+
+		d3.select("#incMatx").selectAll('.incrowlabel').data(d3.range(0,tree.size)).enter()
+			.append('text').attr('class','incrowlabel').text(function(d){ return d;})
+			.attr('x',function(d,i){ return (i-0.5)*tree.incS}).attr('y',function(d,i){ return (i+.8)*tree.incS});
+
+		var svg = document.getElementById("treesvg");
+		svg.setAttribute("width", width);
+		
+		tree.vis.l = _.charAt(0);
+		tree.vis.data.name = _;
+		tree.vis.data.gender = _1;
+		tree.vis.data.wife = checkWife(1);
+		tree.vis.data.husband = checkHusband(1);
+		tree.vis.data.wife_parent = checkWifeParent(1);
+		tree.vis.data.husband_parent = checkHusbandParent(1);
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+	$("input[name=submit]").on('click', function(){
+		validateInput = function(){
+			if($("input[name=name]").val() != ""){
+				var rootName = $("input[name=name]").val();
+				var rootGender = $(".gender").find(":selected").text();
+				var husbandWife = $("input[name=second_name]").val();
+				var husbandWifeParent = $("input[name=parent]").val();
+
+				initialize(rootName, rootGender, husbandWife, husbandWifeParent);
+				$(".root_container").remove();
+
+			}else{
+				alert("Please fill out empty fields");
+			}
+		}
+
+		validateInput();
+	});
+	
+	return tree;
+}
+var tree= tree();
+</script>

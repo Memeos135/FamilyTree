@@ -345,16 +345,15 @@ input[type=submit]:hover {
 				$("." + status + "_info_container").remove();
 		}
 
-
 		$(".button").on('click', function(){
 			// input validation first
 			if($("input[name=name]").val() == "" || $("input[name=relationship]").val() == ""){
-				alert("Please fill out empty fields");
+				// DO NOTHING
 
 			}else{
 
 				if($(".checkbox").prop("checked")==true && ($("input[name=second_name]").val() == "" || $("input[name=parent]").val() == "")){
-					alert("Please fill out all empty fields");
+					// DO NOTHING
 
 				}else{
 

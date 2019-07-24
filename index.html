@@ -5,7 +5,7 @@
 </head>
 <style>
 circle{
-  fill:white;
+  fill:transparent;
   stroke:steelblue;  
   stroke-width:2px;
 }
@@ -41,6 +41,7 @@ line{
 }
 #g_labels text{
 	text-anchor:middle;
+	position: absolute;
 }
 
 /* The Modal (background) */
@@ -62,7 +63,7 @@ line{
   margin: 15% auto; /* 15% from the top and centered */
   padding: 20px;
   border: 1px solid #888;
-  width: 20%; /* Could be more or less, depending on screen size */
+  width: 200px; /* Could be more or less, depending on screen size */
 }
 
 /* The Close Button */
@@ -162,11 +163,9 @@ input[type=submit]:hover {
 
 	// dynamic wife/husband container add
 	var status = "wife";
-	var depth;
 
 	// get input and add it to the tree
 	var modal = document.getElementById("myModal");
-	var span = document.getElementsByClassName("close")[0];
 	var checkbox = document.getElementById("checkbox");
 
 	var height = 300;
@@ -184,6 +183,16 @@ input[type=submit]:hover {
 	        // remove wife section
 	        $("." + status + "_info_container").remove();
 	   }
+	}
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
+	function hoverFunction(_, element){
+		if(_ == 0){
+			console.log(element);
+		}else{
+			console.log("OUT");
+		}
 	}
 // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -331,18 +340,17 @@ input[type=submit]:hover {
 		temp = _;
 		modal.style.display = "inline-block";
 
+		var span = document.getElementsByClassName("close")[0];
 		// click close in modal
 		span.onclick = function() {
-				modal.style.display = "none";
-				// if fields are empty, remove the last added item - because of the logic of implementation, it will always add a node and then we're manually editing it
-				// example: if a user clicks on a node, it will add one, then if he closes the window, the node is still there. WE DELETE IT
-				tree.vis.c.pop();
+				// empty fields and remove modal
 				$("input[name=name]").val('');
 				$("input[name=relationship]").val('');
 				$("input[name=second_name]").val('');
 				$("input[name=parent]").val('');
 				$(".checkbox").prop("checked", false);
 				$("." + status + "_info_container").remove();
+				modal.style.display = "none";
 		}
 
 		$(".button").on('click', function(){
@@ -431,21 +439,21 @@ input[type=submit]:hover {
 		var edges = d3.select("#g_lines").selectAll('line').data(tree.getEdges());
 		
 		edges.transition().duration(500)
-			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
-			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;})
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y+11;})
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y-11;})
 	
 		edges.enter().append('line')
-			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
-			.attr('x2',function(d){ return d.p1.x;}).attr('y2',function(d){ return d.p1.y;})
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y+11;})
+			.attr('x2',function(d){ return d.p1.x;}).attr('y2',function(d){ return d.p1.y-11;})
 			.transition().duration(500)
-			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;});
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y-11;});
 			
 		var circles = d3.select("#g_circles").selectAll('circle').data(tree.getVertices());
 
 		circles.transition().duration(500).attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;});
 		
 		circles.enter().append('circle').attr('cx',function(d){ return d.f.p.x;}).attr('cy',function(d){ return d.f.p.y;}).attr('r',vRad)
-			.on('click',function(d){return openDialog(d.v);}).attr("id", "circle")
+			.on('click',function(d){return openDialog(d.v);}).attr("id", "circle").on('mouseenter', function(d){hoverFunction(0, d);}).on('mouseleave', function(d){hoverFunction(1, d);})
 			.transition().duration(500).attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;});
 			
 		var labels = d3.select("#g_labels").selectAll('text').data(tree.getVertices());
@@ -509,16 +517,16 @@ input[type=submit]:hover {
 	initialize = function(_, _1, _2, _3){		
 
 		d3.select("#treesvg").append('g').attr('id','g_lines').selectAll('line').data(tree.getEdges()).enter().append('line')
-			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y;})
-			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y;});
+			.attr('x1',function(d){ return d.p1.x;}).attr('y1',function(d){ return d.p1.y+10;})
+			.attr('x2',function(d){ return d.p2.x;}).attr('y2',function(d){ return d.p2.y-10;});
+
+		d3.select("#treesvg").append('g').attr('id','g_labels').selectAll('text').data(tree.getVertices()).enter().append('text')
+		.attr('x',function(d){ return d.p.x;}).attr('y',function(d){ return d.p.y+5;}).text(function(d){return _.charAt(0);})
+		.on('click',function(d){return openDialog(d.v);});	
 
 		d3.select("#treesvg").append('g').attr('id','g_circles').selectAll('circle').data(tree.getVertices()).enter()
 			.append('circle').attr('cx',function(d){ return d.p.x;}).attr('cy',function(d){ return d.p.y;}).attr('r',vRad).attr("id", "circle_1")
-			.on('click',function(d){return openDialog(d.v);});
-			
-		d3.select("#treesvg").append('g').attr('id','g_labels').selectAll('text').data(tree.getVertices()).enter().append('text')
-			.attr('x',function(d){ return d.p.x;}).attr('y',function(d){ return d.p.y+5;}).text(function(d){return _.charAt(0);})
-			.on('click',function(d){return openDialog(d.v);});	
+			.on('click',function(d){return openDialog(d.v);}).on('mouseenter', function(d){hoverFunction(0, d);}).on('mouseleave', function(d){hoverFunction(1, d);});
 
 		d3.select("#incMatx").selectAll('.incrowlabel').data(d3.range(0,tree.size)).enter()
 			.append('text').attr('class','incrowlabel').text(function(d){ return d;})
@@ -540,14 +548,8 @@ input[type=submit]:hover {
 	$("input[name=submit]").on('click', function(){
 		validateInput = function(){
 			if($("input[name=name]").val() != ""){
-				var rootName = $("input[name=name]").val();
-				var rootGender = $(".gender").find(":selected").text();
-				var husbandWife = $("input[name=second_name]").val();
-				var husbandWifeParent = $("input[name=parent]").val();
-
-				initialize(rootName, rootGender, husbandWife, husbandWifeParent);
+				initialize($("input[name=name]").val(), $(".gender").find(":selected").text(), $("input[name=second_name]").val(), $("input[name=parent]").val());
 				$(".root_container").remove();
-
 			}else{
 				alert("Please fill out empty fields");
 			}
